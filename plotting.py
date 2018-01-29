@@ -9,6 +9,17 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 def plot_basis_function(args, x_range, y_range, basis, prefix):
+    """
+    Plots 3d graph where the x and y coordinates represent the grid and the z axis encodes the value to be depicted.
+    One could use this to look at q-values, for example. In my work, I've used this plot to show proto-value functions,
+    the successor representation, or eigenvectors.
+
+    :param args: list of all arguments passed at the execution so we can access the paths we are interested at
+    :param x_range: one of the dimensions of the grid world
+    :param y_range: the other dimension of the grid world
+    :param basis: actual values to be plotted
+    :param prefix: string that will be used as the filename of the generated graph
+    """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     # fig, ax = plt.subplots(subplot_kw=dict(projection='3d'))
@@ -30,6 +41,18 @@ def plot_basis_function(args, x_range, y_range, basis, prefix):
 
 
 def plot_policy(env, args, x_range, y_range, policy, prefix):
+    """
+    Plots 2d graph depicting a policy. Right now I don't have any mechanism to break ties, I expect the user to have
+    done that already. TODO: I don't support two actions at the same time, so I'll always depict only one action. I
+    should support this in the future.
+
+    :param env: object containing the environment's features, I access it to plot what I want
+    :param args: list of all arguments passed at the execution so we can access the paths we are interested at
+    :param x_range: one of the dimensions of the grid world
+    :param y_range: the other dimension of the grid world
+    :param policy: actual policy to be plotted. It should be encoded as an integer per state.
+    :param prefix: string that will be used as the filename of the generated graph
+    """
     plt.clf()
     plt.close()
 
@@ -84,6 +107,12 @@ def plot_policy(env, args, x_range, y_range, policy, prefix):
 
 
 def plot_learning_curve(data, prefix):
+    """
+    Plot a regular learning curve with confidence intervals.
+
+    :param data: Result of multiple runs of the algorithm.
+    :param prefix: string that will be used as the filename of the generated graph
+    """
     mean, lower_bound, upper_bound = utils.mean_confidence_interval(data)
     x_lim = len(data[0])
     plt.plot(mean, color='red')

@@ -51,6 +51,14 @@ def mean_confidence_interval(data, confidence=0.95):
 
 
 def epsilon_greedy(q_values, epsilon=0.05):
+    """
+    Regular epsilon-greedy function. It break ties randomly.
+
+    :param q_values: list of values to which we should be greedy w.r.t.
+    :param epsilon: probability we are going to randomly select an action
+
+    :return: index for the action to be taken
+    """
     length_list = len(q_values)
     number = random.uniform(0, 1)
     if number < epsilon:
