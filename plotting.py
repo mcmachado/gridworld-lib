@@ -4,6 +4,8 @@ import utils
 import numpy as np
 import matplotlib.pylab as plt
 import matplotlib.patches as patches
+# I need this for the 3d projection:
+from mpl_toolkits.mplot3d import Axes3D
 
 
 def plot_basis_function(args, x_range, y_range, basis, prefix):
@@ -11,7 +13,7 @@ def plot_basis_function(args, x_range, y_range, basis, prefix):
     ax = fig.add_subplot(111, projection='3d')
     # fig, ax = plt.subplots(subplot_kw=dict(projection='3d'))
     data_x, data_y = np.meshgrid(np.arange(y_range), np.arange(x_range))
-    data_z = basis[:, 0].reshape(x_range, y_range)
+    data_z = basis.reshape(x_range, y_range)
 
     for ii in range(len(data_x)):
         for j in range(int(len(data_x[ii]) / 2)):
@@ -22,11 +24,12 @@ def plot_basis_function(args, x_range, y_range, basis, prefix):
     ax.plot_surface(data_x, data_y, data_z, rstride=1, cstride=1, cmap=plt.get_cmap('jet'))
     plt.gca().view_init(elev=30, azim=30)
     plt.gca().set_zlim(-1.0, 1.0)
-    plt.savefig(args.output + 'eig_' + prefix + '.png')
+    plt.savefig(args.output + prefix + '.png')
     plt.close()
+    plt.clf()
 
 
-def plot_policy(env, args, x_range, y_range, policy, prefix, num_policy):
+def plot_policy(env, args, x_range, y_range, policy, prefix):
     plt.clf()
     plt.close()
 
@@ -76,7 +79,8 @@ def plot_policy(env, args, x_range, y_range, policy, prefix, num_policy):
                 )
             )
 
-    plt.savefig(args.output + 'policy_' + str(num_policy) + '_' + prefix + '.png')
+    plt.savefig(args.output + prefix + '.png')
+    plt.clf()
 
 
 def plot_learning_curve(data, prefix):
@@ -86,4 +90,5 @@ def plot_learning_curve(data, prefix):
     plt.fill_between(range(x_lim), lower_bound, upper_bound, color='red', alpha=0.4)
     plt.xlabel("Episode")
     plt.ylabel("Avg. number of steps")
-    plt.savefig(prefix + 'learning_curve.pdf')
+    plt.savefig(prefix + 'learning_curve.png')
+    plt.clf()

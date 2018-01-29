@@ -12,7 +12,6 @@ class ArgsParser:
     Read the user's input and parse the arguments properly. When returning args, each value is properly filled.
     Ideally one shouldn't have to read this function to access the proper arguments, but I postpone this.
     """
-
     @staticmethod
     def read_input_args():
         # Parse command line
@@ -44,7 +43,7 @@ def mean_confidence_interval(data, confidence=0.95):
     Code obtained from the link below:
     https://stackoverflow.com/questions/15033511/compute-a-confidence-interval-from-sample-data
     """
-    a = 1.0*np.array(data)
+    a = 1.0 * np.array(data)
     n = len(a)
     m, se = np.mean(a, axis=0), scipy.stats.sem(a, axis=0)
     h = se * sp.stats.t._ppf((1+confidence)/2., n-1)

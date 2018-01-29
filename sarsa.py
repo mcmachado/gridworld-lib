@@ -42,11 +42,17 @@ if __name__ == "__main__":
             env.reset()
             num_steps_episode[seed].append(num_steps)
 
+        # Let me plot the max q-values for this seed:
+        max_values = []
+        for i in range(num_states):
+            max_values.append(np.max(q_values[i]))
+        plotting.plot_basis_function(args, num_rows, num_cols, np.array(max_values), 'max_q_seed_' + str(seed))
+
+        # Let me plot the final policy for this seed:
+        policy = []
+        for i in range(num_states):
+            policy.append(np.argmax(q_values[i]))
+        plotting.plot_policy(env, args, num_rows, num_cols, policy, 'policy_seed_' + str(seed))
+
     # Finally, I'll just plot the results to provide examples on how to call the functions you might be interested at:
     plotting.plot_learning_curve(num_steps_episode, args.output)
-
-    policy = []
-    for i in range(num_states):
-        policy.append(np.argmax(q_values[i]))
-
-    plotting.plot_policy(env, args, num_rows, num_cols, policy, 'policy', 1)
