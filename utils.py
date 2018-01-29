@@ -1,78 +1,66 @@
-# Author Marlos C. Machado
+# Author: Marlos C. Machado
 
+import random
+import argparse
 import numpy as np
-import matplotlib.pylab as plt
-import matplotlib.patches as patches
+import scipy as sp
+import scipy.stats
 
 
-def plot_basis_function(args, x_range, y_range, basis, prefix):
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    # fig, ax = plt.subplots(subplot_kw=dict(projection='3d'))
-    data_x, data_y = np.meshgrid(np.arange(y_range), np.arange(x_range))
-    data_z = basis[:, 0].reshape(x_range, y_range)
+class ArgsParser:
+    """
+    Read the user's input and parse the arguments properly. When returning args, each value is properly filled.
+    Ideally one shouldn't have to read this function to access the proper arguments, but I postpone this.
+    """
 
-    for ii in range(len(data_x)):
-        for j in range(int(len(data_x[ii]) / 2)):
-            tmp = data_x[ii][j]
-            data_x[ii][j] = data_x[ii][len(data_x[ii]) - j - 1]
-            data_x[ii][len(data_x[ii]) - j - 1] = tmp
+    @staticmethod
+    def read_input_args():
+        # Parse command line
+        parser = argparse.ArgumentParser(
+            description='Define algorithm\'s parameters.')
 
-    ax.plot_surface(data_x, data_y, data_z, rstride=1, cstride=1, cmap=plt.get_cmap('jet'))
-    plt.gca().view_init(elev=30, azim=30)
-    plt.gca().set_zlim(-1.0, 1.0)
-    plt.savefig(args.output + 'eig_' + prefix + '.png')
-    plt.close()
+        parser.add_argument('-i', '--input', type=str, default='mdps/toy.mdp',
+                            help='File containing the MDP definition (default: mdps/toy.mdp).')
+
+        parser.add_argument('-o', '--output', type=str, default='graphs/',
+                            help='Prefix that will be used to generate all outputs (default: graphs/).')
+
+        parser.add_argument('-s', '--num_seeds', type=int, default=5,
+                            help='Number of seeds to be averaged over when appropriate (default: 30).')
+
+        parser.add_argument('-m', '--max_length_ep', type=int, default=100,
+                            help='Maximum number of time steps an episode may last (default: 100).')
+
+        parser.add_argument('-n', '--num_episodes', type=int, default=1000,
+                            help='Number of episodes in which learning will happen (default: 1000).')
+
+        args = parser.parse_args()
+
+        return args
 
 
-def plot_policy(env, args, x_range, y_range, policy, prefix, num_policy):
-    plt.clf()
-    plt.close()
+def mean_confidence_interval(data, confidence=0.95):
+    """
+    Code obtained from the link below:
+    https://stackoverflow.com/questions/15033511/compute-a-confidence-interval-from-sample-data
+    """
+    a = 1.0*np.array(data)
+    n = len(a)
+    m, se = np.mean(a, axis=0), scipy.stats.sem(a, axis=0)
+    h = se * sp.stats.t._ppf((1+confidence)/2., n-1)
+    return m, m-h, m+h
 
-    from pylab import rcParams
-    rcParams['figure.figsize'] = y_range, x_range
 
-    plt.xlim([0, y_range])
-    plt.ylim([0, x_range])
-
-    for i in range(y_range):
-        plt.axvline(i, color='k', linestyle=':')
-    plt.axvline(y_range, color='k', linestyle=':')
-
-    for j in range(x_range):
-        plt.axhline(j, color='k', linestyle=':')
-    plt.axhline(x_range, color='k', linestyle=':')
-
-    for idx in range(len(policy)):
-        i, j = env.get_state_xy(idx)
-
-        dx = 0
-        dy = 0
-        if policy[idx] == 0:  # up
-            dy = 0.001
-        elif policy[idx] == 1:  # right
-            dx = 0.001
-        elif policy[idx] == 2:  # down
-            dy = -0.001
-        elif policy[idx] == 3:  # left
-            dx = -0.001
-
-        if env.matrixMDP[i][j] != -1 and policy[idx] == 4:  # termination
-            termination = plt.Rectangle(
-                (j, x_range - i - 1), 1, 1, color='r')
-            plt.gca().add_artist(termination)
-
-        elif env.matrixMDP[i][j] != -1:
-            plt.arrow(j + 0.5 - 250 * dx, x_range - i + 0.5 - 1 - 250 * dy, dx, dy,
-                      head_width=0.2, head_length=0.5, fc='k', ec='k')
-        else:
-            plt.gca().add_patch(
-                patches.Rectangle(
-                    (j, x_range - i - 1),  # (x,y)
-                    1.0,  # width
-                    1.0,  # height
-                    facecolor="gray"
-                )
-            )
-
-    plt.savefig(args.output + 'policy_' + str(num_policy) + '_' + prefix + '.png')
+def epsilon_greedy(q_values, epsilon=0.05):
+    length_list = len(q_values)
+    number = random.uniform(0, 1)
+    if number < epsilon:
+        return random.randrange(0, length_list)
+    else:
+        max_val = np.max(q_values)
+        # I need to break ties randomly
+        tmp_indx = []
+        for i in range(length_list):
+            if q_values[i] == max_val:
+                tmp_indx.append(i)
+        return random.choice(tmp_indx)
