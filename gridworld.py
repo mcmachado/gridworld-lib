@@ -226,8 +226,8 @@ class GridWorld:
         :param idx: index uniquely identifying a state
         :return: values x, y describing the state's location in the grid
         """
-        y = idx % self._num_cols
-        x = (idx - y) / self._num_cols
+        y = int(idx % self._num_cols)
+        x = int((idx - y) / self._num_cols)
         return x, y
 
     def get_current_state(self):
